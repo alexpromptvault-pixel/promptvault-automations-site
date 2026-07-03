@@ -15,15 +15,18 @@
   gsap.registerPlugin(ScrollTrigger);
 
   /* ---------------- HERO TEXT REVEAL ---------------- */
+  // Set the initial hidden state FIRST (below the mask), then animate up.
   const lines = document.querySelectorAll('.hero-title .line > span');
   lines.forEach((el, i) => {
+    el.style.transform = 'translateY(110%)';
     gsap.to(el, {
+      y: 0,
       yPercent: 0,
       duration: 1.1,
       ease: 'expo.out',
       delay: 0.15 + i * 0.08,
+      overwrite: 'auto',
     });
-    el.style.transform = 'translateY(110%)';
   });
   gsap.to('.hero .pill, .hero-sub, .cta-row, .trust, .scroll-hint', {
     opacity: 1, y: 0, duration: 1, ease: 'expo.out', delay: 0.7, stagger: 0.08,
