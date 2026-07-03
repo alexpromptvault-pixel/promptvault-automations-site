@@ -72,7 +72,8 @@ async function setDedupe(key, value) {
 
 function mdEscape(s) {
   if (s == null) return '';
-  return String(s).replace(/[_*`\[\]]/g, (m) => '\\' + m);
+  // Telegram MarkdownV2 requires escaping: _ * [ ] ( ) ~ ` > # + - = | { } . !
+  return String(s).replace(/[_*\[\]()~`>#+\-=\|{}.!]/g, (m) => '\\' + m);
 }
 
 function formatVisitorMessage(v) {
@@ -87,9 +88,9 @@ function formatVisitorMessage(v) {
   const os = guessOS(ua);
   const device = /Mobi|Android|iPhone|iPad/i.test(ua) ? 'Mobile' : 'Desktop';
   const lines = [
-    `*New visitor to prompt-vault-automations.netlify.app*`,
+    `*New visitor to prompt-vault-automations\\.netlify\\.app*`,
     ``,
-    `*Time (UK):* ${mdEscape(ukTime)}`,
+    `*Time \\(UK\\):* ${mdEscape(ukTime)}`,
     `*Page:* ${mdEscape(v.path || '/')}`,
     v.referrer ? `*Referrer:* ${mdEscape(v.referrer)}` : `*Referrer:* direct / none`,
     v.utm_source ? `*UTM source:* ${mdEscape(v.utm_source)}` : null,
@@ -103,7 +104,7 @@ function formatVisitorMessage(v) {
     v.geo?.country ? `  • Country: ${mdEscape(v.geo.country)}` : null,
     v.geo?.region ? `  • Region: ${mdEscape(v.geo.region)}` : null,
     v.geo?.latitude && v.geo?.longitude
-      ? `  • Coords: ${v.geo.latitude}, ${v.geo.longitude}`
+      ? `  • Coords: ${mdEscape(String(v.geo.latitude))}, ${mdEscape(String(v.geo.longitude))}`
       : null,
     v.ip ? `  • IP: ${mdEscape(v.ip)}` : null,
     ``,
@@ -111,15 +112,15 @@ function formatVisitorMessage(v) {
     `  • Type: ${device}`,
     `  • OS: ${os}`,
     `  • Browser: ${browser}`,
-    v.screen ? `  • Screen: ${v.screen.w}x${v.screen.h} @ ${v.screen.dpr}x` : null,
+    v.screen ? `  • Screen: ${mdEscape(String(v.screen.w))}x${mdEscape(String(v.screen.h))} @ ${mdEscape(String(v.screen.dpr))}x` : null,
     v.language ? `  • Language: ${mdEscape(v.language)}` : null,
     v.timezone ? `  • Timezone: ${mdEscape(v.timezone)}` : null,
     ``,
     `*Session*`,
     v.sessionId ? `  • ID: \`${mdEscape(v.sessionId)}\`` : null,
-    v.duration ? `  • On page: ${v.duration}s` : null,
-    v.scrollDepth != null ? `  • Scroll depth: ${v.scrollDepth}%` : null,
-    v.ctaClicks ? `  • CTA clicks: ${v.ctaClicks}` : null,
+    v.duration ? `  • On page: ${mdEscape(String(v.duration))}s` : null,
+    v.scrollDepth != null ? `  • Scroll depth: ${mdEscape(String(v.scrollDepth))}%` : null,
+    v.ctaClicks ? `  • CTA clicks: ${mdEscape(String(v.ctaClicks))}` : null,
     v.sectionViews ? `  • Sections viewed: ${mdEscape(v.sectionViews.join(', '))}` : null,
     v.isReturning ? `  • Returning visitor` : null,
     ``,
