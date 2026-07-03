@@ -186,10 +186,7 @@
 })();
 
 /* ---------------- VISITOR BEACON ---------------- */
-/* Passive. No PII is sent; IP and UA are read server-side. Honors Do Not Track. */
-  BOT DETECTION and session tracking. Sends to /.netlify/functions/visitor-tracker.
-  No PII sent; IP and UA read server-side from headers.
-  Failures swallowed silently. Honors Do Not Track. */
+// Passive. No PII sent. IP and UA read server-side. Honors Do Not Track.
 (function beacon() {
   if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
   const isBot = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|preview|monitor/i.test(navigator.userAgent);
