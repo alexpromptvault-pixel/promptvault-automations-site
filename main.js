@@ -184,3 +184,41 @@
     });
   }
 })();
+
+/* ---------------- VISITOR BEACON ---------------- */
+/* Passive. No PII is sent; IP and UA are read server-side. Honors Do Not Track. */
+  BOT DETECTION and session tracking. Sends to /visitor-tracker.
+  No PII sent; IP and UA read server-side from headers.
+  Failures swallowed silently. Honors Do Not Track. */
+(function beacon() {
+  if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+  const isBot = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|preview|monitor/i.test(navigator.userAgent);
+  if (isBot) return;
+  let sid = null;
+  try {
+    const k = 'pva_sid';
+    sid = sessionStorage.getItem(k);
+    if (!sid) { sid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Math.random()); sessionStorage.setItem(k, sid); }
+  } catch (e) {}
+  const send = (event) => {
+    const body = JSON.stringify({
+      event, sid,
+      path: location.pathname,
+      ref: document.referrer || null,
+      href: location.href,
+      lang: navigator.language,
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+      screen: { w: screen.width, h: screen.height, dpr: window.devicePixelRatio || 1 },
+      vp: { w: innerWidth, h: innerHeight },
+      ua: navigator.userAgent
+    });
+    if (navigator.sendBeacon) {
+      const ok = navigator.sendBeacon('/visitor-tracker', new Blob([body], { type: 'application/json' }));
+      if (ok) return;
+    }
+    fetch('/visitor-tracker', { method: 'POST', body, keepalive: true, headers: { 'content-type': 'application/json' } }).catch(() => {});
+  };
+  send('view');
+  // Also beacon on hide (visibility change) so we catch engaged users
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') send('hide'); });
+})();
