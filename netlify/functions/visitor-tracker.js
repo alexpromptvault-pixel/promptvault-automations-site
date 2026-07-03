@@ -70,10 +70,13 @@ async function setDedupe(key, value) {
 
 // --- helpers -----------------------------------------------------------
 
-function mdEscape(s) {
+function htmlEscape(s) {
   if (s == null) return '';
-  // Telegram MarkdownV2 requires escaping: _ * [ ] ( ) ~ ` > # + - = | { } . !
-  return String(s).replace(/[_*\[\]()~`>#+\-=\|{}.!]/g, (m) => '\\' + m);
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function formatVisitorMessage(v) {
@@ -88,43 +91,43 @@ function formatVisitorMessage(v) {
   const os = guessOS(ua);
   const device = /Mobi|Android|iPhone|iPad/i.test(ua) ? 'Mobile' : 'Desktop';
   const lines = [
-    `*New visitor to prompt-vault-automations\\.netlify\\.app*`,
+    `<b>New visitor to prompt-vault-automations.netlify.app</b>`,
     ``,
-    `*Time \\(UK\\):* ${mdEscape(ukTime)}`,
-    `*Page:* ${mdEscape(v.path || '/')}`,
-    v.referrer ? `*Referrer:* ${mdEscape(v.referrer)}` : `*Referrer:* direct / none`,
-    v.utm_source ? `*UTM source:* ${mdEscape(v.utm_source)}` : null,
-    v.utm_medium ? `*UTM medium:* ${mdEscape(v.utm_medium)}` : null,
-    v.utm_campaign ? `*UTM campaign:* ${mdEscape(v.utm_campaign)}` : null,
-    v.utm_term ? `*UTM term:* ${mdEscape(v.utm_term)}` : null,
-    v.utm_content ? `*UTM content:* ${mdEscape(v.utm_content)}` : null,
+    `<b>Time (UK):</b> ${htmlEscape(ukTime)}`,
+    `<b>Page:</b> ${htmlEscape(v.path || '/')}`,
+    v.referrer ? `<b>Referrer:</b> ${htmlEscape(v.referrer)}` : `<b>Referrer:</b> direct / none`,
+    v.utm_source ? `<b>UTM source:</b> ${htmlEscape(v.utm_source)}` : null,
+    v.utm_medium ? `<b>UTM medium:</b> ${htmlEscape(v.utm_medium)}` : null,
+    v.utm_campaign ? `<b>UTM campaign:</b> ${htmlEscape(v.utm_campaign)}` : null,
+    v.utm_term ? `<b>UTM term:</b> ${htmlEscape(v.utm_term)}` : null,
+    v.utm_content ? `<b>UTM content:</b> ${htmlEscape(v.utm_content)}` : null,
     ``,
-    `*Location*`,
-    v.geo?.city ? `  • City: ${mdEscape(v.geo.city)}` : null,
-    v.geo?.country ? `  • Country: ${mdEscape(v.geo.country)}` : null,
-    v.geo?.region ? `  • Region: ${mdEscape(v.geo.region)}` : null,
+    `<b>Location</b>`,
+    v.geo?.city ? `  • City: ${htmlEscape(v.geo.city)}` : null,
+    v.geo?.country ? `  • Country: ${htmlEscape(v.geo.country)}` : null,
+    v.geo?.region ? `  • Region: ${htmlEscape(v.geo.region)}` : null,
     v.geo?.latitude && v.geo?.longitude
-      ? `  • Coords: ${mdEscape(String(v.geo.latitude))}, ${mdEscape(String(v.geo.longitude))}`
+      ? `  • Coords: ${htmlEscape(String(v.geo.latitude))}, ${htmlEscape(String(v.geo.longitude))}`
       : null,
-    v.ip ? `  • IP: ${mdEscape(v.ip)}` : null,
+    v.ip ? `  • IP: ${htmlEscape(v.ip)}` : null,
     ``,
-    `*Device*`,
+    `<b>Device</b>`,
     `  • Type: ${device}`,
     `  • OS: ${os}`,
     `  • Browser: ${browser}`,
-    v.screen ? `  • Screen: ${mdEscape(String(v.screen.w))}x${mdEscape(String(v.screen.h))} @ ${mdEscape(String(v.screen.dpr))}x` : null,
-    v.language ? `  • Language: ${mdEscape(v.language)}` : null,
-    v.timezone ? `  • Timezone: ${mdEscape(v.timezone)}` : null,
+    v.screen ? `  • Screen: ${htmlEscape(String(v.screen.w))}x${htmlEscape(String(v.screen.h))} @ ${htmlEscape(String(v.screen.dpr))}x` : null,
+    v.language ? `  • Language: ${htmlEscape(v.language)}` : null,
+    v.timezone ? `  • Timezone: ${htmlEscape(v.timezone)}` : null,
     ``,
-    `*Session*`,
-    v.sessionId ? `  • ID: \`${mdEscape(v.sessionId)}\`` : null,
-    v.duration ? `  • On page: ${mdEscape(String(v.duration))}s` : null,
-    v.scrollDepth != null ? `  • Scroll depth: ${mdEscape(String(v.scrollDepth))}%` : null,
-    v.ctaClicks ? `  • CTA clicks: ${mdEscape(String(v.ctaClicks))}` : null,
-    v.sectionViews ? `  • Sections viewed: ${mdEscape(v.sectionViews.join(', '))}` : null,
+    `<b>Session</b>`,
+    v.sessionId ? `  • ID: <code>${htmlEscape(v.sessionId)}</code>` : null,
+    v.duration ? `  • On page: ${htmlEscape(String(v.duration))}s` : null,
+    v.scrollDepth != null ? `  • Scroll depth: ${htmlEscape(String(v.scrollDepth))}%` : null,
+    v.ctaClicks ? `  • CTA clicks: ${htmlEscape(String(v.ctaClicks))}` : null,
+    v.sectionViews ? `  • Sections viewed: ${htmlEscape(v.sectionViews.join(', '))}` : null,
     v.isReturning ? `  • Returning visitor` : null,
     ``,
-    v.notes ? `*Notes:* ${mdEscape(v.notes)}` : null,
+    v.notes ? `<b>Notes:</b> ${htmlEscape(v.notes)}` : null,
   ].filter((l) => l !== null && l !== undefined);
   return lines.join('\n');
 }
@@ -159,7 +162,7 @@ async function sendTelegram(text) {
     body: JSON.stringify({
       chat_id: chatId,
       text,
-      parse_mode: 'MarkdownV2',
+      parse_mode: 'HTML',
       disable_web_page_preview: true,
     }),
   });
