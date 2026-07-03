@@ -187,7 +187,7 @@
 
 /* ---------------- VISITOR BEACON ---------------- */
 /* Passive. No PII is sent; IP and UA are read server-side. Honors Do Not Track. */
-  BOT DETECTION and session tracking. Sends to /visitor-tracker.
+  BOT DETECTION and session tracking. Sends to /.netlify/functions/visitor-tracker.
   No PII sent; IP and UA read server-side from headers.
   Failures swallowed silently. Honors Do Not Track. */
 (function beacon() {
@@ -213,10 +213,10 @@
       ua: navigator.userAgent
     });
     if (navigator.sendBeacon) {
-      const ok = navigator.sendBeacon('/visitor-tracker', new Blob([body], { type: 'application/json' }));
+      const ok = navigator.sendBeacon('/.netlify/functions/visitor-tracker', new Blob([body], { type: 'application/json' }));
       if (ok) return;
     }
-    fetch('/visitor-tracker', { method: 'POST', body, keepalive: true, headers: { 'content-type': 'application/json' } }).catch(() => {});
+    fetch('/.netlify/functions/visitor-tracker', { method: 'POST', body, keepalive: true, headers: { 'content-type': 'application/json' } }).catch(() => {});
   };
   send('view');
   // Also beacon on hide (visibility change) so we catch engaged users
